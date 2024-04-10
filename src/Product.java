@@ -31,6 +31,9 @@ public class Product implements Serializable
     {
         return padString(ID, 6);
     }
+    public String getID() {
+        return ID;
+    }
 
     //lets user set name
     public String getPaddedName()
@@ -38,10 +41,26 @@ public class Product implements Serializable
         return padString(name, 35);
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     //lets user get description
     public String getPaddedDescription()
     {
         return padString(description, 75);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     //lets user set description
@@ -71,6 +90,10 @@ public class Product implements Serializable
         this.cost = cost;
     }
 
+
+    public String toCSVDataRecord() {
+        return ID + "," + name + "," + description + "," + cost;
+    }
 
     public byte[] toByteArray()
     {

@@ -8,8 +8,9 @@ import java.util.ArrayList;
 
 public class RandProductMaker extends JFrame {
 
+    public static Product[] products;
     //Variables
-    private ArrayList<Product> products;
+
     private JTextField nameField;
     private JTextField descriptionField;
     private JTextField costField;
@@ -29,7 +30,6 @@ public class RandProductMaker extends JFrame {
         setLayout(new GridLayout(6, 2));
 
         //Initialize variables
-        products = new ArrayList<>();
         nameField = new JTextField();
         descriptionField = new JTextField();
         costField = new JTextField();
