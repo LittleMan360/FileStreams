@@ -8,144 +8,102 @@ import java.util.ArrayList;
 
 public class RandProductMaker extends JFrame {
 
-    private JPanel counterPnl;
-    private JPanel addItemPnl;
-    private JPanel cmdPnl;
+    //Variables
+    private ArrayList<Product> products;
+    private JTextField nameField;
+    private JTextField descriptionField;
+    private JTextField costField;
+    private JTextField idField;
+    private JTextField recordCountField;
+    private JButton addButton;
+    private JButton quitButton;
+    private int recordCount=0;
 
-    private final JTextField idTxt = new JTextField(10);
-    private final JTextField nameTxt = new JTextField(10);
-    private final JTextField descTxt = new JTextField(10);
-    private final JTextField costTxt = new JTextField(10);
-
-    private final JButton addBtn = new JButton("Add");
-    private final JButton saveBtn = new JButton("Save");
-
-    private final JButton quitBtn = new JButton("Quit");
-
-
-
-    private ArrayList<Product> productList = new ArrayList<>();
-    private int count = 0;
-
-    private final Path path = Paths.get("products.dat");
-
+    //Constructor
+    public RandProductMaker()
     {
-        addBtn.addActionListener(this::addBtnActionPerformed);
-
-        saveBtn.addActionListener(this::saveBtnActionPerformed);
-
-        quitBtn.addActionListener(e -> System.exit(0));
-    }
-
-
-    public RandProductMaker(){
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("Product Creator");
-
-
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(path.toFile())))
-        {
-            productList = (ArrayList<Product>) in.readObject();
-            count = productList.size();
-        }
-        catch (ClassNotFoundException | IOException p)
-        {
-            p.printStackTrace();
-        }
-
-        JPanel mainPnl = new JPanel();
-        add(mainPnl);
-
-        generateCounterPnl();
-        mainPnl.add(counterPnl, BorderLayout.NORTH);
-
-        generateAddItemPnl();
-        mainPnl.add(addItemPnl, BorderLayout.CENTER);
-
-        generateCmdPnl();
-        mainPnl.add(cmdPnl, BorderLayout.SOUTH);
-
-        pack();
+        //Set up frame
+        super("Add Product");
         setSize(400, 200);
-        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(6, 2));
+
+        //Initialize variables
+        products = new ArrayList<>();
+        nameField = new JTextField();
+        descriptionField = new JTextField();
+        costField = new JTextField();
+        idField = new JTextField();
+        recordCountField = new JTextField();
+        addButton = new JButton("Submit");
+        quitButton = new JButton("Cancel");
+
+        //Add components to frame
+        add(new JLabel("Name:"));
+        add(nameField);
+        add(new JLabel("Description:"));
+        add(descriptionField);
+        add(new JLabel("Cost:"));
+        add(costField);
+        add(new JLabel("ID:"));
+        add(idField);
+        add(new JLabel("Record Count:"));
+        add(recordCountField);
+        add(addButton);
+        add(quitButton);
+
+        //Add action listeners
+        addButton.addActionListener(this::addproduct);
+        quitButton.addActionListener(e -> System.exit(0));
+
+        //Set frame to be visible
         setVisible(true);
     }
 
-    private void generateCounterPnl(){
-        counterPnl = new JPanel();
-        counterPnl.setLayout(new FlowLayout());
-        counterPnl.add(new JLabel("Product Count: " + count));
-    }
+    private void addproduct(ActionEvent event)
+    {
+        try {
+            String id = idField.getText();
+            String name = nameField.getText();
+            String description = descriptionField.getText();
+            double cost = Double.parseDouble(costField.getText());
 
-    private void generateAddItemPnl(){
-        addItemPnl = new JPanel();
-        addItemPnl.setLayout(new GridLayout(4,2));
-        addItemPnl.add(new JLabel("ID:"));
-        addItemPnl.add(idTxt);
-        addItemPnl.add(new JLabel("Name:"));
-        addItemPnl.add(nameTxt);
-        addItemPnl.add(new JLabel("Description:"));
-        addItemPnl.add(descTxt);
-        addItemPnl.add(new JLabel("Cost:"));
-        addItemPnl.add(costTxt);
-    }
+            // Validation could be more thorough in a real application
+            if (name.isEmpty() || description.isEmpty() || id.isEmpty())
+            {
+                JOptionPane.showMessageDialog(this, "All fields must be filled", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-    private void generateCmdPnl(){
-        cmdPnl = new JPanel();
-        cmdPnl.setLayout(new FlowLayout());
-        cmdPnl.add(addBtn);
-        cmdPnl.add(saveBtn);
-        cmdPnl.add(quitBtn);
-    }
+            Product product = new Product(id, name, description, cost);
 
-    private void addBtnActionPerformed(ActionEvent e){
-        addRecord();
-    }
+            try (RandomAccessFile file = new RandomAccessFile("Product.dat", "rw"))
+            {
+                file.seek(file.length());
+                file.write(product.toByteArray());
+                recordCount++;
+                recordCountField.setText(String.valueOf(recordCount));
+                clearFields();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Failed to write to file", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-
-    private void saveBtnActionPerformed(ActionEvent e){
-        saveRecords();
-    }
-
-    private void addRecord(){
-        String id = idTxt.getText();
-        String name = nameTxt.getText();
-        String desc = descTxt.getText();
-        double cost = Double.parseDouble(costTxt.getText());
-
-        Product product = new Product(id, name, desc, cost);
-        productList.add(product);
-        count++;
-        clearFields();
-        updateCounter();
-    }
-
-    private void saveRecords(){
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path.toFile())))
-        {
-            out.writeObject(productList);
-        }
-        catch (IOException p)
-        {
-            p.printStackTrace();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Cost must be a valid number.", "Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void updateCounter(){
-        counterPnl.removeAll();
-        counterPnl.add(new JLabel("Product Count: " + count));
-        counterPnl.revalidate();
-        counterPnl.repaint();
+    private void clearFields()
+    {
+        idField.setText("");
+        nameField.setText("");
+        descriptionField.setText("");
+        costField.setText("");
     }
 
-    private void clearFields() {
-        idTxt.setText("");
-        nameTxt.setText("");
-        descTxt.setText("");
-        costTxt.setText("");
-    }
-
-    public static void main(String[] args){
+    public static void main(String[] args)
+    {
         new RandProductMaker();
     }
 

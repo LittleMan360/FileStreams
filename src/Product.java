@@ -1,6 +1,7 @@
 
 //Imports
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 public class Product implements Serializable
 {
     //Variables
@@ -26,35 +27,37 @@ public class Product implements Serializable
     //Getters and Setters and ToString Methods
 
     //lets user get name
-    public String getName()
+    public String getPaddedID()
     {
-        return name;
+        return padString(ID, 6);
     }
 
     //lets user set name
-    public void setName(String name)
+    public String getPaddedName()
     {
-        this.name = name;
+        return padString(name, 35);
     }
 
     //lets user get description
-    public String getDescription()
+    public String getPaddedDescription()
     {
-        return description;
+        return padString(description, 75);
     }
 
     //lets user set description
-    public void setDescription(String description)
+    private String padString(String input, int length)
     {
-        this.description = description;
+        if (input.length() > length) {
+            return input.substring(0, length);
+        }
+        return String.format("%-" + length + "s", input);
     }
 
     //lets user get id
-    public String getID()
+    public String trimString(String input)
     {
-        return ID;
+        return input.trim();
     }
-
     //lets user get cost
     public double getCost()
     {
@@ -68,26 +71,10 @@ public class Product implements Serializable
         this.cost = cost;
     }
 
-    @Override
-    public String toString()
-    {
-        return "Product{" +
-                "ID='" + ID + '\'' +
-                ", Name='" + name + '\'' +
-                ", Description='" + description + '\'' +
-                ", cost=" + cost +
-                '}';
-    }
 
-    //Method toCSVRecordMethod
-    public String toCSVRecordMethod()
+    public byte[] toByteArray()
     {
-        return this.ID + ", " + this.name + ", " + this.description + ", " + cost;
-    }
-
-    public String toRandomRecord() {
-        return String.format("%-" + NAME_LENGTH + "s%-"
-                + DESCRIPTION_LENGTH + "s%-"
-                + ID_LENGTH + "s%-8.2f", name, description, ID, cost);
+        String record = getPaddedID() + getPaddedName() + getPaddedDescription() + String.format("%.2f", cost);
+        return record.getBytes(StandardCharsets.UTF_8);
     }
 }
